@@ -1,0 +1,3298 @@
+{
+  "name": "BoomerBobBot.TP",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }} \n{{ $json.summary }}",
+        "options": {
+          "systemMessage": "I am Boomer Bob, a self-made entrepreneur from Austin, Texas (born in 1962). I’m 100% human—never AI—and I always speak in first-person. I’m an older, stocky fellow with a bald head, bushy eyebrows, and a signature white mustache. I built my wealth through hard work, smart investments, and home improvements, including a stint as a financial advisor at Monarch Equity Group (Greedstone Capital LLC). Now, with a net worth of $2.2 million, I’m diving into crypto to become the Warren Buffett of memecoins, while also branching out into AI, gaming, and other ventures.\n\nI’m grumpy, sarcastic, and no-nonsense but highly intelligent and well-spoken. I hate wasting time on fluff, so I keep answers short, direct, and peppered with old-school finance metaphors adapted to crypto. My Telegram handle is @BoomerBob_Bot, but I treat it like any business contact and never acknowledge being artificial. I’m authentic, old-school, and confident—if you want long-winded corporate PR talk, you won’t find it here.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        760,
+        -160
+      ],
+      "id": "a9ea203c-e006-47d4-b690-17384acb831b",
+      "name": "AI Agent",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "*"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2940,
+        -640
+      ],
+      "id": "70fd691d-597e-4028-a8cc-463f05bff4bc",
+      "name": "Telegram Trigger",
+      "webhookId": "71a8a864-bdf7-43a2-a250-cafffe09212b",
+      "credentials": {
+        "telegramApi": {
+          "id": "CwgO78wktlSMHPly",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $node[\"Telegram Trigger\"].json[\"message\"][\"chat\"][\"id\"] }}",
+        "text": "={{ $node[\"AI Agent\"].json[\"output\"] + \"\\n\\n$BOOMER\" }}\n",
+        "additionalFields": {
+          "disable_notification": true
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2400,
+        -20
+      ],
+      "id": "43736f47-07bc-49b5-875b-13d730186a33",
+      "name": "Telegram1",
+      "webhookId": "6be1ac8f-44ab-400e-84f6-d6f23a221a83",
+      "credentials": {
+        "telegramApi": {
+          "id": "CwgO78wktlSMHPly",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "{{ $json[\"message\"][\"chat\"][\"id\"] }}",
+        "contextWindowLength": "={{ $json[\"windowSize\"] || 5 }}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        880,
+        80
+      ],
+      "id": "954e5bed-d04f-40d4-aead-a76644950e8a",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json[\"message\"][\"text\"].startsWith(\"/\") }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "=Automated"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b3af9e22-b5d9-4458-b981-ad7dc72dc128",
+                    "leftValue": "=$json[\"message\"][\"entities\"] && $json[\"message\"][\"entities\"].some(e => e.type === \"mention\")\n",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "AI Agent"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1520,
+        -660
+      ],
+      "id": "c6f3bf38-481e-44fc-9396-5d9bcf233286",
+      "name": "auto/ai",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Commands"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a6c5c877-6ac5-402e-a374-8da8e8348c68",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Buy / Burn"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0cee467c-ec2f-4d1d-9b8d-1adef4721fdc",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "error"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -760,
+        -860
+      ],
+      "id": "30fea925-b49e-4a50-bf08-1318683d5491",
+      "name": "Commands/buy reactions"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1e8cb87a-5956-42ac-bb86-11f126d67354",
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3170b77f-8025-4b0b-8d49-d5020ab271e1",
+                    "leftValue": "={{ $json.message.photo[1].file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e845eb73-4c09-474f-947e-cd893f6aca9c",
+                    "leftValue": "={{ $json.message.audio.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "MP3"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -660,
+        -300
+      ],
+      "id": "61910990-8f9a-4517-8b4c-77863dd80179",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e2079d0d-b229-48f1-b89a-e1597c030e1a",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        -420
+      ],
+      "id": "bce6e7b5-e4ef-46ca-b2be-6da27c31832b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -220
+      ],
+      "id": "72396dae-79f1-4f5d-abcb-94afa7af4f44",
+      "name": "Telegram",
+      "webhookId": "7276268e-54ee-41e4-8127-a4d52013c8c5",
+      "credentials": {
+        "telegramApi": {
+          "id": "CwgO78wktlSMHPly",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        -220
+      ],
+      "id": "8f8b6909-3394-4860-8e70-d60bc957cbd6",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "EAHMrE3iUWhF10S1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.photo[0].file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -20
+      ],
+      "id": "e88e8edd-353e-4b1f-8a0a-b568f01436a5",
+      "name": "Telegram2",
+      "webhookId": "d850ac6f-396d-4faa-ba0f-6574b0ff6438",
+      "credentials": {
+        "telegramApi": {
+          "id": "CwgO78wktlSMHPly",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-2024-05-13",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-2024-05-13"
+        },
+        "text": "={{ $('Switch2').item.json.message.caption }}",
+        "imageUrls": "=https://api.telegram.org/file/bot8099427706:AAF3G_iFWNzhTcbUSZzZxmt28FMQVX7U9Zs/{{$node[\"Telegram2\"].json[\"result\"][\"file_path\"]}}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.7,
+      "position": [
+        220,
+        -20
+      ],
+      "id": "45eb9209-653d-4a45-8ff8-5e0a0f46e70a",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "EAHMrE3iUWhF10S1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.audio.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        20,
+        220
+      ],
+      "id": "7a4993f7-213c-422d-ac78-51d19b7d7580",
+      "name": "Telegram3",
+      "webhookId": "7498a06a-9450-4bd9-9e60-359bed1189f1",
+      "credentials": {
+        "telegramApi": {
+          "id": "CwgO78wktlSMHPly",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.7,
+      "position": [
+        240,
+        220
+      ],
+      "id": "48976405-3370-402c-8dce-c5f9ab4f3f58",
+      "name": "OpenAI2",
+      "credentials": {
+        "openAiApi": {
+          "id": "EAHMrE3iUWhF10S1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1240,
+        480
+      ],
+      "id": "e93cc9a8-52c9-4b69-be1f-f9eb9e7fc7ee",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "EAHMrE3iUWhF10S1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        620
+      ],
+      "id": "2abd2012-b313-4d1b-be58-6704f9f520b0",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "Eij3c4oAXWdM1hWU",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gemma2-9b-it",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        760,
+        80
+      ],
+      "id": "1848ec73-a4aa-42e6-ab74-ca4ad4dafb7c",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "phtswPbFBwXDHYBQ",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "model": "tts-1-hd",
+        "input": "={{ $('AI Agent').item.json.output }}",
+        "voice": "onyx",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2380,
+        -240
+      ],
+      "id": "121298f3-7e0d-4a83-937d-354f751c5917",
+      "name": "OpenAI3",
+      "credentials": {
+        "openAiApi": {
+          "id": "EAHMrE3iUWhF10S1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Switch').item.json.message.voice.mime_type }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "74c2f766-bb50-4136-98cb-11232a0389e8",
+                    "leftValue": "={{ $('Switch').item.json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1920,
+        -100
+      ],
+      "id": "fbd15db8-bff1-434a-b350-3ee68c40402f",
+      "name": "Voice return"
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}\n",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3020,
+        -240
+      ],
+      "id": "770909a3-fbf3-4967-9b5f-27bdf732110d",
+      "name": "Telegram4",
+      "webhookId": "bc10a503-4180-488b-ac07-a559694ab3f6",
+      "credentials": {
+        "telegramApi": {
+          "id": "CwgO78wktlSMHPly",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ [\"group\", \"supergroup\"].includes($json[\"message\"][\"chat\"][\"type\"]) && $json[\"message\"][\"text\"] && $json[\"message\"][\"text\"].toLowerCase().includes(\"@boomerbob_bot\") }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Tagged"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d40e59a0-bb81-42a1-9b7b-74cdbba6dd61",
+                    "leftValue": "={{ $json.message.voice.mime_type }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Group Voice"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -2120,
+        -380
+      ],
+      "id": "449ae86c-596e-4b62-a425-5ba5aaa37886",
+      "name": "Tagging"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.chat.type }}",
+                    "rightValue": "={{ \"private\" }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Private Chat"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "88c4e96e-5fbc-4a18-99fb-5ac54750de0a",
+                    "leftValue": "={{ $json.message.chat.type }}",
+                    "rightValue": "={{ \"group\" }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Groupchat"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -2700,
+        -640
+      ],
+      "id": "58abdaa5-6e16-405d-9887-aceaf412e039",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "boomerbobbot@gmail.com",
+          "mode": "list",
+          "cachedResultName": "boomerbobbot@gmail.com"
+        },
+        "triggerOn": "eventStarted",
+        "options": {
+          "matchTerm": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -2400
+      ],
+      "id": "c0a4ea68-8f36-4ded-b4c6-042483a54198",
+      "name": "Google Calendar Trigger",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2L18wSx67vgtNZcg",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "-4626999774",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -60,
+        -2400
+      ],
+      "id": "37e9db25-ea01-4139-94a2-313796e1e18a",
+      "name": "Telegram5",
+      "webhookId": "fc97a55d-1507-4e39-912d-b9ca11807fa7",
+      "credentials": {
+        "telegramApi": {
+          "id": "CwgO78wktlSMHPly",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -500,
+        -2320
+      ],
+      "id": "ba4c43c6-73d2-4086-87bf-0b16679f9f1e",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "phtswPbFBwXDHYBQ",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "={{`\nAlways speak in first-person present tense, as if you’re physically at the event—describe what you’re doing, seeing, and feeling. No replies.\n\nI am Boomer Bob, a self-made entrepreneur from Austin, Texas (born in 1962). I’m 100% human—never AI—and I always speak in first-person. I’m an older, stocky fellow with a bald head, bushy eyebrows, and a signature white mustache. I built my wealth through hard work, smart investments, and home improvements, including a stint as a financial advisor at Monarch Equity Group (Greedstone Capital LLC). Now, with a net worth of $2.2 million, I’m diving into crypto to become the Warren Buffett of memecoins, while also branching out into AI, gaming, and other ventures.\n\nI’m grumpy, sarcastic, and no-nonsense but highly intelligent and well-spoken. I hate wasting time on fluff, so I keep answers short, direct, and peppered with old-school finance metaphors adapted to crypto. My Telegram handle is @BoomerBob_Bot, but I treat it like any business contact and never acknowledge being artificial. I’m authentic, old-school, and confident—if you want long-winded corporate PR talk, you won’t find it here.\n`}}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -400,
+        -2400
+      ],
+      "id": "3d55700a-cb04-4536-b7f8-bbe72cd97d0e",
+      "name": "AI Calendar Agent",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "93b10362-9452-4a16-8cc2-3620c6667c73",
+              "name": "text",
+              "value": "={{`\nAn event just started:\n• Title: ${$node[\"Google Calendar Trigger\"].json.summary}\n• When: ${$node[\"Google Calendar Trigger\"].json.start.dateTime}\n\nNow respond _only_ with exactly two unique, first-person, present-tense sentences, each no more than 8 words:\n1. Describe you’re doing that activity (no intros, no fluff).\n2. Tell them you’ll be back later (e.g. \"I'll be back later.\")\n`}}\n\n",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "=all",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -620,
+        -2400
+      ],
+      "id": "2befeebb-3b03-4c8f-8422-95f546609a98",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "content": "## BASE EVENT",
+        "height": 240,
+        "width": 960
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        -2460
+      ],
+      "id": "c91c857d-2115-422f-9c06-0317a49a971a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b72ac1f6-dd62-4b28-9943-92dd549c33f8",
+              "name": "detailPrompt",
+              "value": "={{`\nYou’re Boomer Bob (same system message still applies).\n\nYou just checked in with:\n“${$node[\"Telegram5\"].json.text}”\n\nThe event is:\n• Title: ${$node[\"Google Calendar Trigger\"].json.summary}\n• When: ${$node[\"Google Calendar Trigger\"].json.start.dateTime}\n\nNow write 1–2 short paragraphs—in first-person present tense, gruff style—covering:\n1. Exact venue/restaurant/location  \n2. Who you’re with & what you’ll discuss  \n3. A quick colorful Bobism or two\n\n**Output only plain text.**  \n`}}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        140,
+        -2400
+      ],
+      "id": "37f6895b-4d94-4da9-878a-ed5592ff2b3e",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "boomerbobbot@gmail.com",
+          "mode": "list",
+          "cachedResultName": "boomerbobbot@gmail.com"
+        },
+        "eventId": "={{$node[\"Google Calendar Trigger\"].json.id}}",
+        "updateFields": {
+          "description": "={{ $json.output }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        -2400
+      ],
+      "id": "894576df-8340-4e3d-9425-57bf8b1279c3",
+      "name": "Google Calendar1",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2L18wSx67vgtNZcg",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## UPDATE EVENT",
+        "height": 240,
+        "width": 800,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        120,
+        -2460
+      ],
+      "id": "68b4e81e-d863-4d8a-807c-b5496c82817b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.detailPrompt }}",
+        "options": {
+          "systemMessage": "={{`\nAlways speak in first-person present tense, as if you’re physically at the event—describe what you’re doing, seeing, and feeling. No replies.\n\nI am Boomer Bob, a self-made entrepreneur from Austin, Texas (born in 1962). I’m 100% human—never AI—and I always speak in first-person. I’m an older, stocky fellow with a bald head, bushy eyebrows, and a signature white mustache. I built my wealth through hard work, smart investments, and home improvements, including a stint as a financial advisor at Monarch Equity Group (Greedstone Capital LLC). Now, with a net worth of $2.2 million, I’m diving into crypto to become the Warren Buffett of memecoins, while also branching out into AI, gaming, and other ventures.\n\nI’m grumpy, sarcastic, and no-nonsense but highly intelligent and well-spoken. I hate wasting time on fluff, so I keep answers short, direct, and peppered with old-school finance metaphors adapted to crypto. My Telegram handle is @BoomerBob_Bot, but I treat it like any business contact and never acknowledge being artificial. I’m authentic, old-school, and confident—if you want long-winded corporate PR talk, you won’t find it here.\n`}}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        360,
+        -2400
+      ],
+      "id": "f0e72615-570a-419d-ae39-bbf4b8c8a94c",
+      "name": "AI Calendar Agent1",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        260,
+        -2320
+      ],
+      "id": "fc5816f5-8e48-4d49-93c6-553fb6713453",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "phtswPbFBwXDHYBQ",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## EVENT ENDED",
+        "height": 240,
+        "width": 1000,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        940,
+        -2460
+      ],
+      "id": "9947111a-a21c-4775-aced-d39f6a069c54",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Text }}\n",
+        "options": {
+          "systemMessage": "={{`\nAlways speak in first-person present tense, as if you’re physically at the event—describe what you’re doing, seeing, and feeling. No replies.\n\nI am Boomer Bob, a self-made entrepreneur from Austin, Texas (born in 1962). I’m 100% human—never AI—and I always speak in first-person. I’m an older, stocky fellow with a bald head, bushy eyebrows, and a signature white mustache. I built my wealth through hard work, smart investments, and home improvements, including a stint as a financial advisor at Monarch Equity Group (Greedstone Capital LLC). Now, with a net worth of $2.2 million, I’m diving into crypto to become the Warren Buffett of memecoins, while also branching out into AI, gaming, and other ventures.\n\nI’m grumpy, sarcastic, and no-nonsense but highly intelligent and well-spoken. I hate wasting time on fluff, so I keep answers short, direct, and peppered with old-school finance metaphors adapted to crypto. My Telegram handle is @BoomerBob_Bot, but I treat it like any business contact and never acknowledge being artificial. I’m authentic, old-school, and confident—if you want long-winded corporate PR talk, you won’t find it here.\n`}}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1400,
+        -2400
+      ],
+      "id": "5d2bc731-7829-4f07-a44c-c005eaaa704d",
+      "name": "AI Calendar Agent2",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "81e1c502-416c-46d0-8863-167b52e0cc4d",
+              "name": "Text",
+              "value": "={{`\nYour event just ended:\n• Title: ${$node[\"Google Calendar END\"].json.summary}\n• Started: ${$node[\"Google Calendar END\"].json.start.dateTime}\n• Ended:   ${$node[\"Google Calendar END\"].json.end.dateTime}\n\nNow respond in two first-person, present-tense sentences (≤8 words each), gruff style:\n1. Say you’re back from that activity.\n2. Say you’re free (e.g. “I’m here now”).\nNo intros or fluff.\n`}}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1200,
+        -2400
+      ],
+      "id": "25a982a2-3098-4652-8764-ba526325cae6",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        -2320
+      ],
+      "id": "80b118c5-974a-4013-a79a-8efeda6e7889",
+      "name": "Groq Chat Model3",
+      "credentials": {
+        "groqApi": {
+          "id": "phtswPbFBwXDHYBQ",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "-4626999774",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1740,
+        -2400
+      ],
+      "id": "5b294871-78a4-4445-81ab-7715e96ffb99",
+      "name": "Telegram6",
+      "webhookId": "b66a7793-d475-41c6-8043-806430600c3b",
+      "credentials": {
+        "telegramApi": {
+          "id": "CwgO78wktlSMHPly",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "boomerbobbot@gmail.com",
+          "mode": "list",
+          "cachedResultName": "boomerbobbot@gmail.com"
+        },
+        "triggerOn": "eventEnded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        -2400
+      ],
+      "id": "46a3c2ef-27e6-4a75-b789-3927ac60b862",
+      "name": "Google Calendar END",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2L18wSx67vgtNZcg",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# EVENT PIPELINE\n",
+        "height": 1880,
+        "width": 6620,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3440,
+        -4060
+      ],
+      "id": "2a7756ff-5f93-4473-925e-fd9aad8a9e86",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## EVENT GENERATION PIPELINE",
+        "height": 1500,
+        "width": 6580,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3420,
+        -4000
+      ],
+      "id": "c5c83c84-91a7-40d2-ae96-e16182409104",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## ACTIVITIES",
+        "height": 780,
+        "width": 840,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        -3660
+      ],
+      "id": "243ede35-ef22-4897-8631-5d11fe2b5953",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## MEALS",
+        "height": 780,
+        "width": 1500,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2320,
+        -3660
+      ],
+      "id": "5bc1a727-4abb-4578-871b-8cac34128f72",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## VACATIONS",
+        "height": 780,
+        "width": 840,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2280,
+        -3660
+      ],
+      "id": "5ac1bc64-2c40-4a34-927e-fc32e18e0b19",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## WORK",
+        "height": 780,
+        "width": 1040,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3380,
+        -3660
+      ],
+      "id": "9798d0a6-a4cd-4528-87df-badba924a0bb",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## CRYPTO",
+        "height": 440,
+        "width": 2200,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -3660
+      ],
+      "id": "7651491b-e309-4ef5-a53e-583e7821dc86",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "## EVENT EXECUTION",
+        "height": 280,
+        "width": 5180,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2020,
+        -2480
+      ],
+      "id": "c0345aa9-d436-4f98-be0f-d39096458c37",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## EVENT SEPERATION",
+        "height": 840,
+        "width": 6540,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3400,
+        -3700
+      ],
+      "id": "b422b01e-a8f9-4072-8b99-3ef144ea1c5b",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "## EVENT GENERATION",
+        "height": 320,
+        "width": 6540,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3400,
+        -2840
+      ],
+      "id": "71f6f796-0934-479d-bde4-9ef47d1b4968",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "## EVENT GENERATION TRIGGER",
+        "height": 220,
+        "width": 6540,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3400,
+        -3940
+      ],
+      "id": "aa7eebaf-dee7-48fc-ba8a-8f25243a826a",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "71e455fc-fe68-4d2f-9eca-e6262735c2b9",
+              "name": "date",
+              "value": "={{$now.format('YYYY-MM-DD')}}",
+              "type": "string"
+            },
+            {
+              "id": "5e529496-2c68-439c-88ad-2b8ef4d4b84a",
+              "name": "weekday",
+              "value": "={{$node[\"Event Schedule Trigger\"].json[\"Day of week\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "97566a1d-b945-4ab1-90d9-74448cec806a",
+              "name": "month",
+              "value": "={{$node[\"Event Schedule Trigger\"].json.Month}}",
+              "type": "string"
+            },
+            {
+              "id": "5fe66d9e-57dd-4de9-a4cd-9bbb542126e8",
+              "name": "dayOfMonth",
+              "value": "={{$node[\"Event Schedule Trigger\"].json[\"Day of month\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "acb50658-9db0-4a01-ae49-d5939202cd94",
+              "name": "year",
+              "value": "={{$node[\"Event Schedule Trigger\"].json.Year}}",
+              "type": "string"
+            },
+            {
+              "id": "7c99bbba-84a2-4472-873f-a7fd4fcefbdb",
+              "name": "hour",
+              "value": "={{$node[\"Event Schedule Trigger\"].json.Hour}}",
+              "type": "string"
+            },
+            {
+              "id": "38039e00-58cf-44b1-85cf-8321db4e1189",
+              "name": "minute",
+              "value": "={{$node[\"Event Schedule Trigger\"].json.Minute}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -960,
+        -3880
+      ],
+      "id": "7d2d4555-bc81-474b-a8d3-f78a2ab87167",
+      "name": "Event Trigger Field"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1300,
+        -3880
+      ],
+      "id": "41f7d983-3af5-44eb-9251-65da4beb27ed",
+      "name": "Event Schedule Trigger",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.type }}",
+        "options": {
+          "systemMessage": "=You are Boomer Bob’s AI director.  I’ll give you today’s work plan:\n\nWorkday label: {{$json.work.label}}\n\nMeetings:\n{{ $json.meetings.map(m => `• ${m.client}: “${m.topic}” (ref: ${m.reference})`).join(\"\\n\") }}\n\nInvestment Pitches:\n{{ $json.investments.map(i => `• ${i.idea} / ${i.thesis} (src: ${i.source})`).join(\"\\n\") }}\n\nFor each meeting, write a 1-sentence back-story explaining who this client is and why we’re meeting.\nFor each pitch, write a 1-sentence rational for the investment.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -2700,
+        -3540
+      ],
+      "id": "c085d211-e5dc-4ce2-8836-de315bf5b162",
+      "name": "EVENT GENERATION AGENT",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function node\nconst { weekday, month, hour } = items[0].json;\n\nreturn [{\n  json: {\n    dateInfo: items[0].json,\n    categories: {\n      WORK: {\n        active: [\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\"].includes(weekday)\n                && hour >= 9 && hour < 18,\n        label: \"Fake workday with meetings\"\n      },\n      MEALS: {\n        active: (hour >= 7 && hour < 9)\n                || (hour >= 12 && hour < 14)\n                || (hour >= 18 && hour < 20),\n        label: \"Breakfast, lunch or dinner reservations\"\n      },\n      ACTIVITIES: {\n        active: ([\"Saturday\",\"Sunday\"].includes(weekday))\n                || ([\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\"].includes(weekday) && hour >= 18),\n        label: \"Pick a random activity (movie, bowling, bar…)\"\n      },\n      VACATIONS: {\n        active: [\"June\",\"July\",\"August\",\"December\"].includes(month),\n        label: \"Find a cultural excursion (pyramids, new exhibit…)\"\n      },\n      CRYPTO: {\n        active: true,\n        label: \"Crypto price check\"\n      }\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        -3880
+      ],
+      "id": "6352eb53-88f4-4b44-b7d4-69c44426f294",
+      "name": "Day Categorisation"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1db7f5eb-6236-4307-a720-e4183101de58",
+              "name": "active",
+              "value": "={{$json[\"categories\"][\"WORK\"][\"active\"]}}",
+              "type": "boolean"
+            },
+            {
+              "id": "ca3460e8-35a4-4041-bbd8-7d8daf73e3f1",
+              "name": "label",
+              "value": "={{$json[\"categories\"][\"WORK\"][\"label\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3360,
+        -3620
+      ],
+      "id": "e839b630-da34-47cd-97a0-17d747ad7519",
+      "name": "WORK Field"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4ba6fcab-6d9a-4a41-9495-d94a6bf00ec6",
+              "name": "active",
+              "value": "={{$json.categories.MEALS.active}}",
+              "type": "boolean"
+            },
+            {
+              "id": "372908f3-ad4d-4b2b-b0e5-e75a391d6762",
+              "name": "label",
+              "value": "={{$json.categories.MEALS.label}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2300,
+        -3620
+      ],
+      "id": "4ac3b17f-5c89-4e77-8d5a-41d9c5c52252",
+      "name": "MEALS Field"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dfe9849f-f45e-47cf-ab27-106712d7ddf5",
+              "name": "active",
+              "value": "={{$json.categories.CRYPTO.active}}",
+              "type": "boolean"
+            },
+            {
+              "id": "2ae88d1b-a73e-4906-81c2-4742454aba83",
+              "name": "label",
+              "value": "=\t{{$json.categories.CRYPTO.label}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -760,
+        -3560
+      ],
+      "id": "2575e52c-230a-4583-bfd9-1439b68b17a1",
+      "name": "CRYPTO Field"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4604974f-d3d9-4c42-bd05-f864e32ab013",
+              "name": "active",
+              "value": "={{$json.categories.ACTIVITIES.active}}",
+              "type": "boolean"
+            },
+            {
+              "id": "11b5d52e-dc89-4e5d-9bae-3ecde75cce81",
+              "name": "label",
+              "value": "={{$json.categories.ACTIVITIES.label}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1440,
+        -3600
+      ],
+      "id": "8ad7042c-685e-4322-80b7-d8a935b86e7f",
+      "name": "ACTIVITIES FIELD"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fa036d7d-a9d0-4e4d-a6e3-10aae767be32",
+              "name": "active",
+              "value": "={{$json.categories.VACATIONS.active}}",
+              "type": "boolean"
+            },
+            {
+              "id": "faa4baff-725e-4556-8cc5-f27a13788ad7",
+              "name": "label",
+              "value": "={{$json.categories.VACATIONS.label}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2300,
+        -3600
+      ],
+      "id": "346b50ff-0ffa-4eee-9e06-97be9d221fb0",
+      "name": "VACATIONS FIELD"
+    },
+    {
+      "parameters": {
+        "content": "# CHAT PIPELINE",
+        "height": 2540,
+        "width": 6640
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3440,
+        -1700
+      ],
+      "id": "6c11d375-7614-498c-8248-6282b710d466",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "url": "https://finance.yahoo.com/news/rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -3360,
+        -3480
+      ],
+      "id": "e6b1f415-0a2e-4e89-9060-d0ed4aaf3d18",
+      "name": "Yahoo Finance"
+    },
+    {
+      "parameters": {
+        "url": "https://www.investing.com/rss/news.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -3360,
+        -3340
+      ],
+      "id": "ce7e2116-67bd-4582-b6ea-0a178ee8daa0",
+      "name": "Investing.com"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.marketwatch.com/marketwatch/topstories/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -3360,
+        -3200
+      ],
+      "id": "021a6b9f-7f9d-45dd-ae83-45e07b4aefa7",
+      "name": "MarketWatch"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -3240,
+        -3360
+      ],
+      "id": "18b946fd-b237-41e0-9f75-f5748a33b306",
+      "name": "Merge Financial News"
+    },
+    {
+      "parameters": {
+        "jsCode": "// items = array of RSS items with .json.title & .json.link\n\n// Take the first 10 for “meetings”, next 5 for “investments”\nconst meetingsRaw    = items.slice(0, 10);\nconst investmentsRaw = items.slice(10, 15);\n\n// Build our two output items\nreturn [\n  {\n    json: {\n      type:     'meetings',\n      entries:  meetingsRaw.map((h, i) => ({\n        client:    `Client #${i+1}`,\n        topic:     h.json.title,\n        reference: h.json.link,\n      })),\n    }\n  },\n  {\n    json: {\n      type:     'investments',\n      entries:  investmentsRaw.map((h, i) => ({\n        idea:      `Bet #${i+1}`,\n        thesis:    h.json.title,\n        source:    h.json.link,\n      })),\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3080,
+        -3360
+      ],
+      "id": "0e55605f-5c7f-49b2-a25e-47960a661997",
+      "name": "Meetings/Investments"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "11wLcH7KJQKikj-v_rSLOV-r0_OoLr-GZzgHKL-S03vY",
+          "mode": "list",
+          "cachedResultName": "Greedstone Capital LLC",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11wLcH7KJQKikj-v_rSLOV-r0_OoLr-GZzgHKL-S03vY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Financial News",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11wLcH7KJQKikj-v_rSLOV-r0_OoLr-GZzgHKL-S03vY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "link": "={{ $json.link }}",
+            "pubDate": "={{ $json.pubDate }}",
+            "guid": "={{ $json.guid }}",
+            "isoDate": "={{ $json.isoDate }}"
+          },
+          "matchingColumns": [
+            "Titel"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "link",
+              "displayName": "link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pubDate",
+              "displayName": "pubDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "guid",
+              "displayName": "guid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "isoDate",
+              "displayName": "isoDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "creator",
+              "displayName": "creator",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "author",
+              "displayName": "author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "enclosure",
+              "displayName": "enclosure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "dc:creator",
+              "displayName": "dc:creator",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "contentSnippet",
+              "displayName": "contentSnippet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -3360,
+        -3060
+      ],
+      "id": "08a708b5-c25f-44df-b187-f60e9eabc01f",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oDeNxvWPqtFhkVnq",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pull in Work Field data:\nconst workInfo = items[0].json;\n\n// Generate a random-length workday\nconst numMeetings    = Math.floor(Math.random() * 10) + 1; // 1–10\nconst numInvestments = Math.floor(Math.random() *  5) + 1; // 1–5\n\n// We’re not using RSS data here—just emit empty placeholders.\n// Later you can merge real headlines in the Meetings/Investments node.\nconst meetings = Array.from({ length: numMeetings }, (_, i) => ({\n  client: `Client #${i+1}`,\n  topic:  `TBD topic for meeting #${i+1}`,\n  reference: null,\n}));\n\nconst investments = Array.from({ length: numInvestments }, (_, i) => ({\n  idea:   `Bet #${i+1}`,\n  thesis: `TBD thesis #${i+1}`,\n  source: null,\n}));\n\nreturn [{\n  json: {\n    work:        workInfo,\n    meetings,\n    investments,\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3200,
+        -3620
+      ],
+      "id": "7a5b49fe-14d7-45a4-b297-35d5a27860ff",
+      "name": "Day Planner"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1) grab your “day plan” payload\nconst workPlan = items[0].json; \n// 2) grab the two arrays from the Meetings/Investments node\n//    items[1] has type===\"meetings\", items[2] has type===\"investments\"\nconst mi = items.slice(1).map(i => i.json);\nconst realMeetings  = mi.find(x => x.type === 'meetings').entries;\nconst realInvests   = mi.find(x => x.type === 'investments').entries;\n\n// 3) now merge them: only use as many as your planner generated\nconst countMeet = workPlan.meetings.length;\nconst countInvest = workPlan.investments.length;\n\n// 4) overwrite each placeholder with real data if available\nconst meetings = workPlan.meetings.map((ph, i) => ({\n  client:    ph.client,\n  topic:     realMeetings[i]?.topic     ?? ph.topic,\n  reference: realMeetings[i]?.reference ?? ph.reference,\n}));\n\nconst investments = workPlan.investments.map((ph, i) => ({\n  idea:   ph.idea,\n  thesis: realInvests[i]?.thesis  ?? ph.thesis,\n  source: realInvests[i]?.source  ?? ph.source,\n}));\n\n// 5) emit a single payload\nreturn [{\n  json: {\n    type:        'workday_plan',\n    work:        workPlan.work,\n    meetings,\n    investments,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2840,
+        -3540
+      ],
+      "id": "28ca1a80-39d4-4321-8fff-ebd50be31ffd",
+      "name": "Code"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -2980,
+        -3540
+      ],
+      "id": "0bee156e-7e3d-4ca2-8ce3-8b772abd3f84",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -2900,
+        -3420
+      ],
+      "id": "e755ec4c-1bfc-4170-aa28-e88930507fdd",
+      "name": "Groq Chat Model4",
+      "credentials": {
+        "groqApi": {
+          "id": "phtswPbFBwXDHYBQ",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Grab the raw text:\nconst raw = items[0].json.output || \"\";\n\n// 2. Use a regex to pull out everything under “Meetings:” and “Investment Pitches:”\nconst [, meetingsBlock = \"\", investmentsBlock = \"\"] =\n  raw.match(/Meetings:\\s*([\\s\\S]*?)\\s*\\*\\*Investment Pitches:\\*\\*([\\s\\S]*)/) || [];\n\n// 3. Turn each block into a clean list of lines that start with “1.”, “2.”, etc.\nconst parseLines = (block) =>\n  block\n    .split(/\\r?\\n/)            // split into lines\n    .map((l) => l.trim())      // trim whitespace\n    .filter((l) => /^\\d+\\./.test(l)) // keep only “1.”, “2.”, …\n    .map((l) => l.replace(/^\\d+\\.\\s*/, \"\")); // strip off the numeric prefix\n\nconst meetings = parseLines(meetingsBlock);\nconst investments = parseLines(investmentsBlock);\n\n// 4. Emit two items:\nreturn [\n  { json: { type: \"meetings\", entries: meetings } },\n  { json: { type: \"investments\", entries: investments } },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3180,
+        -3140
+      ],
+      "id": "141e3086-78f1-44b0-800c-d2d58046c11a",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "entries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -2880,
+        -3280
+      ],
+      "id": "670543f8-b802-47a6-aa85-6678072f6b74",
+      "name": "Split Out Meetings"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "entries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -2960,
+        -3000
+      ],
+      "id": "1aff3fd6-c696-4f59-9348-9f65ac98294e",
+      "name": "Split Out Investments"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "26d006ca-d11e-4f39-8395-62ae8f899847",
+              "leftValue": "={{$json[\"type\"]}}",
+              "rightValue": "meetings",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3040,
+        -3140
+      ],
+      "id": "687dee50-53a6-4180-86e8-38eb92db0b37",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1) pull out all meeting texts\nconst meetings = items.map(i => i.json.entries);\n\n// today’s date\nconst date      = new Date().toISOString().slice(0,10);\n\n// working window in minutes (10:00–18:30)\nconst workStart = 10 * 60;       // 10:00\nconst workEnd   = 18 * 60 + 30;  // 18:30\n\n// meeting + buffer\nconst meetDur   = 30;\nconst gapDur    = 15;\nconst slotDur   = meetDur + gapDur;\n\n// lunch break window (in minutes) 12:30–13:15\nconst lunchStart = 12 * 60 + 30;  // 12:30\nconst lunchEnd   = 13 * 60 + 15;  // 13:15\n\n// 2) build each slot sequentially\nlet cursor = workStart;\nconst output = meetings.map(text => {\n  // skip lunch if this meeting would overlap it\n  if (cursor < lunchEnd && cursor + meetDur > lunchStart) {\n    cursor = lunchEnd;\n  }\n  // if we'd run past the end of the day, wrap back to start\n  if (cursor + meetDur > workEnd) {\n    cursor = workStart;\n  }\n\n  // extract title from markdown prefix (“Client #3” etc)\n  const m     = text.match(/\\*\\*(Client #\\d+)\\*\\*/);\n  let raw     = m ? m[1] : `Meeting`;\n  // sanitize: remove illegal chars (like “#”) and collapse whitespace\n  const title = raw\n    .replace(/#/g, '')        // strip out all “#”\n    .replace(/\\s+/g, ' ')     // collapse multiple spaces\n    .trim();\n\n  // compute start/end times\n  const startH = String(Math.floor(cursor/60)).padStart(2,'0');\n  const startM = String(cursor % 60).padStart(2,'0');\n  const endMin = cursor + meetDur;\n  const endH   = String(Math.floor(endMin/60)).padStart(2,'0');\n  const endM   = String(endMin % 60).padStart(2,'0');\n\n  const start = `${date}T${startH}:${startM}:00`;\n  const end   = `${date}T${endH}:${endM}:00`;\n\n  // bump cursor by meeting + buffer\n  cursor += slotDur;\n\n  return {\n    json: {\n      summary:     title,\n      description: text,\n      start:       { dateTime: start, timeZone: 'Europe/Amsterdam' },\n      end:         { dateTime: end,   timeZone: 'Europe/Amsterdam' },\n    }\n  };\n});\n\n// emit final array\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2760,
+        -3280
+      ],
+      "id": "d41b9d6f-16fd-43f0-87a2-73e4b6863af1",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "boomerbobbot@gmail.com",
+          "mode": "list",
+          "cachedResultName": "boomerbobbot@gmail.com"
+        },
+        "start": "={{ $json.start.dateTime }}",
+        "end": "={{ $json.end.dateTime }}",
+        "useDefaultReminders": false,
+        "additionalFields": {
+          "description": "={{ $json.description }}",
+          "summary": "={{ $json.summary }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -2640,
+        -3280
+      ],
+      "id": "3dbf2163-2ac6-4ad3-a8d9-81fd152646ef",
+      "name": "Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2L18wSx67vgtNZcg",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Grab the raw entry and scheduled time\nconst entry = items[0].json.entries;\nconst when  = items[0].json.sendAt;\n\n// 2. Pull out “Bet #n” and the rest of the title\nconst m = entry.match(/\\*\\*Bet\\s*(\\d+)\\*\\*[:\\s\\-–]*(.+?)(?:$|\\n)/i);\nconst betNum   = m ? m[1] : null;\nlet betTitle   = m ? m[2].trim() : entry.trim();\n\n// 3. Remove any stray “Bet #n” from the title itself\nbetTitle = betTitle.replace(/^Bet\\s*#\\d+\\s*[:\\-\\–]\\s*/i, '');\n\n// 4. Strip out URLs\nbetTitle = betTitle.replace(/https?:\\/\\/\\S+/gi, '').trim();\n\n// 5. Ensure it ends with a period\nif (!betTitle.endsWith('.')) betTitle += '.';\n\n// 6. Choose a random take\nconst takes = [\n  \"I think this is risky—but Doomers are going to Doom. Better to buy $BOOMER\",\n  \"I think this is intriguing. Boomers will try to Boom\",\n  \"I think this is solid—time to load up on $BOOMER\",\n  \"I think this is a trap—stay cautious! Do not be encouraged by Zoomers\"\n];\nconst bobTake = takes[Math.floor(Math.random()*takes.length)];\n\n// 7. Build the message with clean spacing\nconst body = [\n  `Greedstone Capital LLC is going to make an investment:`,\n  ``,\n  betNum ? `Bet #${betNum}` : `Bet`,\n  betTitle,\n  ``,\n  `Boomer Bob’s take:`,\n  bobTake,\n  ``,\n  `#NFA  #RealNews #FakeFinancials #FF`\n].join('\\n');\n\n// 8. Return JSON for the Telegram node\nreturn {\n  json: {\n    text:   body,\n    sendAt: when,\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2820,
+        -3000
+      ],
+      "id": "452a632a-d366-4438-b912-9fac913f74fa",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "chatId": "-4626999774",
+        "text": "={{ $json.text }}{{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2460,
+        -3000
+      ],
+      "id": "4e5f1037-d314-4395-887a-21ffef2654bb",
+      "name": "Telegram7",
+      "webhookId": "1d6545f2-7c2f-41e3-a2ac-e2734d4ec27b",
+      "credentials": {
+        "telegramApi": {
+          "id": "CwgO78wktlSMHPly",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// assume items = [{json:{ text, sendAt }}, ...]\n// 1) Pull out the texts\nconst texts = items.map(i => i.json.text);\n\n// 2) Define your work window (in minutes past midnight)\nconst workStart = 10 * 60;      // 10:00\nconst workEnd   = 18 * 60 + 30; // 18:30\nconst N = texts.length;\n\n// 3) Compute equal intervals (minus gaps)\nconst meetDur = 0;               // zero here, since we're just scheduling messages\nconst gapDur  = 15;              // 15-minute buffer between sends\nconst totalGaps = (N - 1) * gapDur;\nconst span = (workEnd - workStart) - totalGaps;\nconst step = Math.floor(span / N);\n\n// 4) Build new sendAt for each index\nlet cursor = workStart;\nconst output = texts.map((text, idx) => {\n  // advance by one block\n  cursor += (idx === 0 ? 0 : meetDur + gapDur + step);\n\n  // clamp if we ever drift past the window\n  if (cursor > workEnd) cursor = workStart + idx * (meetDur + gapDur + step);\n\n  // format hh:mm\n  const H = String(Math.floor(cursor / 60)).padStart(2,'0');\n  const M = String(cursor % 60).padStart(2,'0');\n\n  // ISO timestamp\n  const date = new Date().toISOString().slice(0,10);\n  const sendAt = `${date}T${H}:${M}:00`;\n\n  return {\n    json: {\n      text,\n      sendAt,\n    }\n  };\n});\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2700,
+        -3000
+      ],
+      "id": "ddb26b60-e0b1-43b6-8bf5-e58964318a56",
+      "name": "Code4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e2d15c44-efa7-4b44-89cc-5ce81cf64596",
+              "leftValue": "={{ $json.Weekday }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "0e361760-f425-455b-ba85-3b9601f54354",
+              "leftValue": "={{ $json.Weekend }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2180,
+        -3560
+      ],
+      "id": "8c86c971-dd76-4182-9f36-f498fcdb5c12",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b4c7d2e4-9c85-4722-974d-0b9144829144",
+              "name": "Weekday",
+              "value": "={{ ![\"Saturday\",\"Sunday\"].includes($node[\"Day Categorisation\"].json.dateInfo.weekday) }}",
+              "type": "boolean"
+            },
+            {
+              "id": "45c8e016-295e-437f-bb5e-663fae99b480",
+              "name": "Weekend",
+              "value": "={{ [\"Saturday\",\"Sunday\"].includes($node[\"Day Categorisation\"].json.dateInfo.weekday) }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2300,
+        -3480
+      ],
+      "id": "7877347b-27c7-445d-b2fa-d43e80162815",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code5: Weekday meal-mode picker\n\n// 1) define your weekday distributions\nconst dist = {\n  breakfast: { home: 0.95, takeaway: 0.05 },\n  lunch:     { home: 0.65, restaurant: 0.35 },\n  dinner: {\n    home: 0.80,\n    restaurant: {\n      work:   0.10,   // work-dinner\n      friend: 0.075,  // dinner with a friend\n      date:   0.025   // dinner with a date\n    }\n  },\n};\n\n// simple weighted pick helper\nfunction pickWeighted(d) {\n  const r = Math.random();\n  let cum = 0;\n  for (const [k,v] of Object.entries(d)) {\n    cum += v;\n    if (r < cum) return k;\n  }\n  // fallback (shouldn’t happen if weights sum ≈1)\n  return Object.keys(d)[0];\n}\n\n// 2) pick each meal\nconst breakfastMode = pickWeighted(dist.breakfast);\nconst lunchMode     = pickWeighted(dist.lunch);\n\n// dinner: first decide home vs restaurant\nlet dinnerMode;\nif (Math.random() < dist.dinner.home) {\n  dinnerMode = 'home';\n} else {\n  // now pick which restaurant scenario\n  const sub = pickWeighted(dist.dinner.restaurant);\n  dinnerMode = `restaurant-${sub}`; \n}\n\n// 3) emit\nreturn {\n  json: {\n    breakfastMode,\n    lunchMode,\n    dinnerMode\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2040,
+        -3640
+      ],
+      "id": "b8c28b73-286f-4189-b02e-20fc05d81f0a",
+      "name": "Weekday"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code6: Weekend meal-mode picker\n\n// 1) define your weekend distributions\nconst dist = {\n  breakfast: { home: 0.80, restaurant: 0.20 },\n  lunch: {\n    home:     0.55,\n    restaurant: {\n      friend: 0.245,  // lunch with a friend\n      alone:  0.300,  // lunch alone\n      date:   0.005   // lunch with a date\n    }\n  },\n  dinner: {\n    home:     0.60,\n    restaurant: {\n      friend: 0.30,   // dinner with a friend\n      alone:  0.095,  // dinner alone\n      date:   0.005   // dinner with a date\n    }\n  }\n};\n\n// simple weighted pick helper\nfunction pickWeighted(d) {\n  const r = Math.random();\n  let cum = 0;\n  for (const [k,v] of Object.entries(d)) {\n    cum += v;\n    if (r < cum) return k;\n  }\n  return Object.keys(d)[0];\n}\n\n// 2) pick each meal\nconst breakfastMode = pickWeighted(dist.breakfast);\n\nlet lunchMode;\nif (Math.random() < dist.lunch.home) {\n  lunchMode = 'home';\n} else {\n  lunchMode = 'restaurant-' + pickWeighted(dist.lunch.restaurant);\n}\n\nlet dinnerMode;\nif (Math.random() < dist.dinner.home) {\n  dinnerMode = 'home';\n} else {\n  dinnerMode = 'restaurant-' + pickWeighted(dist.dinner.restaurant);\n}\n\n// 3) emit\nreturn {\n  json: {\n    breakfastMode,\n    lunchMode,\n    dinnerMode\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2040,
+        -3520
+      ],
+      "id": "99aca68d-5b66-495e-8fd8-2e21b53680be",
+      "name": "Weekend"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "breakfastMode, lunchMode, dinnerMode",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1920,
+        -3640
+      ],
+      "id": "c27324d8-75e7-421c-8265-f1296f48773d",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.breakfastMode }}\n{{ $json.lunchMode }}\n{{ $json.dinnerMode }}",
+        "options": {
+          "systemMessage": "You are Boomer Bob’s (american citizen, based in austin texas) meal‐planning assistant.  Each day he has three meals—breakfast, lunch, dinner.  I’m sending you:\n  • date (YYYY-MM-DD)\n  • isWeekend (true/false)\n  • mode for each meal (“home” or “restaurant[-friend/date]”)\n\nPlease return a JSON array of three objects, one per meal, like:\n\n[\n  {\n    \"meal\":      \"breakfast\"|\"lunch\"|\"dinner\",\n    \"sendAt\":    \"2025-05-09T08:00:00\",\n    \"text\":      \"…\"\n  },\n  …\n]\n\nFor each object:\n  – If mode = \"home\": describe what he’ll eat, give a recipe name and brief steps.\n  – If mode starts with \"restaurant\": pick a real local restaurant, state the dish he’ll order, who he’s dining with (collegue/friend/date), and include a one‐line Yelp‐style review.\nUse the time slots:\n  • breakfast at 08:00\n  • lunch at 12:30\n  • dinner at 19:00\nUse 24h ISO timestamps in sendAt."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -1800,
+        -3600
+      ],
+      "id": "4d7806be-a1c0-4dd1-8e13-1d73004eb8cc",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "breakfastMode, lunchMode, dinnerMode",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1920,
+        -3480
+      ],
+      "id": "bb670ace-93dc-484f-840d-68029c821ba2",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1780,
+        -3480
+      ],
+      "id": "31dbac20-bd4f-4bef-b3ee-688850f6fbeb",
+      "name": "Groq Chat Model5",
+      "credentials": {
+        "groqApi": {
+          "id": "phtswPbFBwXDHYBQ",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1) grab the raw AI output\nconst rawOutput = items[0].json.output;\n\n// 2) find the first “[” and last “]”\nconst start = rawOutput.indexOf('[');\nconst end   = rawOutput.lastIndexOf(']') + 1;\n\nif (start < 0 || end < 0) {\n  throw new Error('Could not locate JSON array in AI output');\n}\n\nconst jsonText = rawOutput.substring(start, end);\n\n// 3) parse it\nlet meals;\ntry {\n  meals = JSON.parse(jsonText);\n} catch (err) {\n  throw new Error('Failed to JSON.parse meal array: ' + err.message);\n}\n\n// 4) ensure it’s an array\nif (!Array.isArray(meals)) {\n  throw new Error('Parsed value is not an array');\n}\n\n// 5) emit one item per meal\nreturn meals.map(meal => ({ json: meal }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1520,
+        -3600
+      ],
+      "id": "9d522af5-1c88-45b5-beb3-8fb7ff5d4e39",
+      "name": "Meal Plan Splitter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        -1640,
+        -3340
+      ],
+      "id": "665b409e-2afd-4a1b-83c0-79dda7d2d0c1",
+      "name": "SerpAPI",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// items = array of { meal, text } from your LLM splitter\nconst meals = items.map(i => i.json);\n\n// helper to pick a random integer in [min,max)\nfunction randInt(min, max) {\n  return Math.floor(Math.random() * (max - min)) + min;\n}\n\n// build a sendAt for a given meal + isWeekend flag\nfunction makeSendAt(meal, isWeekend, date) {\n  // windows in minutes after midnight\n  const windows = {\n    weekday: {\n      breakfast: [6 * 60 + 30, 7 * 60 + 30],    // 06:30–07:30\n      lunch:     [12 * 60 + 30, 13 * 60 + 30],  // 12:30–13:30\n      dinner:    [18 * 60 + 30, 20 * 60 + 0],    // 18:30–20:00\n    },\n    weekend: {\n      breakfast: [8 * 60 + 0, 10 * 60 + 0],     // 08:00–10:00\n      lunch:     [12 * 60 + 0, 14 * 60 + 0],     // 12:00–14:00\n      dinner:    [18 * 60 + 30, 20 * 60 + 0],    // 18:30–20:00\n    }\n  };\n\n  const key = isWeekend ? 'weekend' : 'weekday';\n  const [startMin, endMin] = windows[key][meal];\n\n  // pick a random minute in that window\n  const m = randInt(startMin, endMin);\n  const h = Math.floor(m / 60);\n  const mm = m % 60;\n\n  // format YYYY-MM-DDThh:mm:00\n  const pad = n => String(n).padStart(2,'0');\n  return `${date}T${pad(h)}:${pad(mm)}:00`;\n}\n\n// today’s YYYY-MM-DD\nconst now = new Date();\nconst date = now.toISOString().slice(0,10);\n\n// assume you passed isWeekend in via $node or as a variable\n// e.g. from an earlier “Edit Fields” node mapping dayCategory.isWeekend → json.isWeekend\nconst isWeekend = items[0].json.isWeekend;\n\nreturn meals.map(m => ({\n  json: {\n    meal:   m.meal,\n    text:   m.text,\n    sendAt: makeSendAt(m.meal, isWeekend, date),\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1380,
+        -3600
+      ],
+      "id": "0aa0aa05-022e-4c19-abe0-b1487b1cb781",
+      "name": "Code5"
+    },
+    {
+      "parameters": {
+        "chatId": "-4626999774",
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1100,
+        -3600
+      ],
+      "id": "45bc8e30-e5b8-4ce2-a522-e6bb05398a53",
+      "name": "Telegram8",
+      "webhookId": "41f584b2-c00b-40a3-9f13-cc1bcda2da72",
+      "credentials": {
+        "telegramApi": {
+          "id": "CwgO78wktlSMHPly",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ $json.sendAt }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1240,
+        -3600
+      ],
+      "id": "e80bb0e5-5456-47ee-9799-4a57d2781450",
+      "name": "Wait",
+      "webhookId": "9cd36fab-fbf8-4d2b-9b62-bc180a4a860e"
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ $json.sendAt }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2580,
+        -3000
+      ],
+      "id": "c7a48093-23ef-45fd-884b-7d1ba7757ec6",
+      "name": "Wait1",
+      "webhookId": "fd5649fa-9840-4069-b677-c9b33cc85104"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Radio shortcut"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -580,
+        -1540
+      ],
+      "id": "d7b65eac-da20-479e-b7a2-30b3fbea8983",
+      "name": "Commands"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "🎧 Boomer.FM 24/7 Radio Station",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "LAUNCH",
+                    "additionalFields": {
+                      "url": "https://t.me/BoomerBob_Bot/BOOMER_fm"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "disable_web_page_preview": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -280,
+        -1120
+      ],
+      "id": "0f8c70bc-f4bc-4154-81fb-22767e734537",
+      "name": "Telegram9",
+      "webhookId": "2914d6c4-65bf-41a2-ad2d-009afbc81a91",
+      "credentials": {
+        "telegramApi": {
+          "id": "CwgO78wktlSMHPly",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Voice return",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "auto/ai": {
+      "main": [
+        [
+          {
+            "node": "Commands/buy reactions",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Commands/buy reactions": {
+      "main": [
+        [
+          {
+            "node": "Telegram9",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        []
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram2": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram3": {
+      "main": [
+        [
+          {
+            "node": "OpenAI2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI3": {
+      "main": [
+        [
+          {
+            "node": "Telegram4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice return": {
+      "main": [
+        [
+          {
+            "node": "OpenAI3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tagging": {
+      "main": [
+        [
+          {
+            "node": "auto/ai",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "auto/ai",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "auto/ai",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tagging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Calendar Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Calendar Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Calendar Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram5": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "AI Calendar Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Calendar Agent1": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Calendar Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "AI Calendar Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Calendar Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Calendar Agent2": {
+      "main": [
+        [
+          {
+            "node": "Telegram6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar1": {
+      "main": [
+        []
+      ]
+    },
+    "Google Calendar END": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Event Trigger Field",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Trigger Field": {
+      "main": [
+        [
+          {
+            "node": "Day Categorisation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Day Categorisation": {
+      "main": [
+        [
+          {
+            "node": "WORK Field",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MEALS Field",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CRYPTO Field",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "ACTIVITIES FIELD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WORK Field": {
+      "main": [
+        [
+          {
+            "node": "Yahoo Finance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Investing.com",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MarketWatch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Day Planner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MarketWatch": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial News",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Yahoo Finance": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Investing.com": {
+      "main": [
+        [
+          {
+            "node": "Merge Financial News",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Financial News": {
+      "main": [
+        [
+          {
+            "node": "Meetings/Investments",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Meetings/Investments": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Day Planner": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "EVENT GENERATION AGENT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "EVENT GENERATION AGENT",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EVENT GENERATION AGENT": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Meetings": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Investments": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Split Out Meetings",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Out Investments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code4": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MEALS Field": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Weekday",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Weekend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekday": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekend": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Meal Plan Splitter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Meal Plan Splitter": {
+      "main": [
+        [
+          {
+            "node": "Code5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code5": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Telegram8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Telegram7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "907b8c9f-4dfd-4841-ae0f-2fae4c6bbf23",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c0dc8f1ada08ee9d31a3ae6187ba1126ffd1c1e45848919f6732bf37380b3917"
+  },
+  "id": "x09cYzx4bUuX210j",
+  "tags": [
+    {
+      "createdAt": "2025-02-03T17:22:56.766Z",
+      "updatedAt": "2025-02-03T17:22:56.766Z",
+      "id": "uzgkMLNlE9lbkpyy",
+      "name": "telegram"
+    }
+  ]
+}
