@@ -1,0 +1,17 @@
+# boomerverse-lore/wrangler.toml
+
+name = "boomerverse-lore-worker"
+main = "worker.js"
+type = "javascript"
+
+account_id = "aa8a1427610bfae5ba8e587a471cb0f9"
+workers_dev = true
+compatibility_date = "2025-05-17"
+
+[env.production]
+  # If you have a custom domain, fill in route & zone_id:
+  # route = "lore.yourdomain.com/*"
+  # zone_id = "your-zone-id-from-cloudflare"
+
+[vars]
+# (no secrets here; you can set those in the Dashboard under Settings → Variables and Secrets)
