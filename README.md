@@ -131,3 +131,11 @@ Any editor/IDE caches
 
 You don’t need to change this—your secrets are never committed.
 
+🎯 Next Steps
+Add CI (GitHub Actions)
+
+Hook up custom domains & routes
+
+Expand lore content & image tags
+
+Build additional automations
