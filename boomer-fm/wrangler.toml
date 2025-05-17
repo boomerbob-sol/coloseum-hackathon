@@ -1,0 +1,17 @@
+# boomer-fm/wrangler.toml
+
+name = "boomerfm-worker"           # The name of your Worker
+main = "worker.js"                 # Entry point (relative to this folder)
+type = "javascript"                # Or "webpack" / "rust" if you’re using another build
+account_id = "aa8a1427610bfae5ba8e587a471cb0f9"
+workers_dev = true                 # Deploy to workers.dev subdomain
+compatibility_date = "2025-05-17"  # YYYY-MM-DD, adjust to today’s date
+
+[env.production]
+  route = "boomerfm-worker.BOOMERBOBBOT.workers.dev/*"
+  zone_id = ""                     # only if you bind to a custom domain/zone
+
+# If you want to bind your .env secrets as environment variables:
+# (Otherwise you set them manually in the Workers dashboard under Settings → Variables and Secrets)
+[vars]
+# (empty here—keep your real secrets out of source control)
