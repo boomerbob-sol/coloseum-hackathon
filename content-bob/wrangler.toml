@@ -1,0 +1,27 @@
+# content-bob/wrangler.toml
+
+name = "contentbob-worker"             # the name of your Worker
+main = "worker.js"                     # entry point
+type = "javascript"                    # or "webpack", "rust" etc.
+
+# ────────────────────────────────────────────────────────
+# Your Cloudflare account details
+# ────────────────────────────────────────────────────────
+account_id       = "aa8a1427610bfae5ba8e587a471cb0f9"  # ← your CF account ID
+workers_dev      = true
+compatibility_date = "2025-05-17"
+
+# ────────────────────────────────────────────────────────
+# Build & upload settings
+# ────────────────────────────────────────────────────────
+[build]
+upload = { format = "service-worker" }
+
+# ────────────────────────────────────────────────────────
+# Runtime Environment Variables
+# (these will be populated via `wrangler secret put …`)
+# ────────────────────────────────────────────────────────
+[vars]
+CLOUDINARY_CLOUD_NAME           = ""  # dwczqcavn
+CONTENTBOB_CLOUDINARY_API_KEY   = ""
+CONTENTBOB_CLOUDINARY_API_SECRET= ""
